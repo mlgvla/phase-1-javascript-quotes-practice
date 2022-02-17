@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
-  getQuotes()
+  initSortBtn()
   configureForm()
+  getQuotes()
 })
 
 // Quote List Functions
@@ -8,12 +9,10 @@ document.addEventListener("DOMContentLoaded", () => {
 function getQuotes() {
   fetch("http://localhost:3000/quotes?_embed=likes")
     .then(r => r.json())
-    .then(quotes => displayQuotes(quotes)) 
+    .then(quotes => sortQuotes(quotes))
 }
 
 function displayQuotes(quotes) {
-    // check if sort button is active - if so, run sort by author
-    //authorSort ? quotes.sort((a, b) => a.author.localeCompare(b.author)) : null
   let quoteListDiv = document.getElementById("quote-list")
   quoteListDiv.innerHTML = ""
 
@@ -65,7 +64,7 @@ function addLike(quoteId) {
     },
     body: JSON.stringify({
       quoteId: parseInt(quoteId),
-      createdAt: Math.floor(Date.now()/1000),
+      createdAt: Math.floor(Date.now() / 1000),
     }),
   }).then(() => getQuotes())
 }
@@ -102,3 +101,27 @@ function saveFormData(formData) {
     .then(() => getQuotes())
 }
 
+// Sort Functions
+function initSortBtn() {
+  let sortBtn = document.getElementById("sort-btn")
+  sortBtn.value = "false"
+
+  sortBtn.addEventListener("click", () => {
+    if (sortBtn.value === "false") {
+      sortBtn.value = "true"
+      sortBtn.innerHTML = "Sort by Quote ID"
+    } else {
+      sortBtn.value = "false"
+      sortBtn.innerHTML = "Sort by Author"
+    }
+    getQuotes()
+  })
+}
+
+function sortQuotes(quotes) {
+  let sortBtn = document.getElementById("sort-btn")
+  if (sortBtn.value === "true") {
+    quotes.sort((a, b) => a.author.localeCompare(b.author))
+  }
+  displayQuotes(quotes)
+}
